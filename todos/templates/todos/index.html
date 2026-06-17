@@ -1,0 +1,138 @@
+{% extends 'todos/base.html' %}
+{% block content %}
+
+<header>
+  <span class="dot"></span>
+  <h1>Shak</h1>
+  <div class="stats">
+    <span><strong>{{ active }}</strong> left</span>
+    <span><strong>{{ completed }}</strong> done</span>
+  </div>
+</header>
+
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="message">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Add task -->
+<div class="add-card">
+  <form method="post" action="{% url 'add_todo' %}">
+    {% csrf_token %}
+    <div class="add-row">
+      {{ form.title }}
+      <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+    <button type="button" class="details-toggle" onclick="toggleExtra()">+ priority &amp; description</button>
+    <div class="extra-fields">
+      {{ form.priority }}
+      {{ form.description }}
+    </div>
+  </form>
+</div>
+
+<!-- Search bar -->
+<form method="get" action="{% url 'todo_list' %}">
+  <div class="add-row" style="margin-bottom: 1rem;">
+    <input
+      type="text"
+      name="search"
+      class="form-input"
+      placeholder="Search tasks..."
+      value="{{ search_query }}"
+    />
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if search_query %}
+      <a href="{% url 'todo_list' %}" class="btn btn-ghost">✕ Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<!-- Filters -->
+<div class="filters">
+  <a href="?filter=all{% if priority_filter %}&priority={{ priority_filter }}{% endif %}"
+     class="filter-btn {% if filter_status == 'all' %}active{% endif %}">All</a>
+  <a href="?filter=active{% if priority_filter %}&priority={{ priority_filter }}{% endif %}"
+     class="filter-btn {% if filter_status == 'active' %}active{% endif %}">Active</a>
+  <a href="?filter=completed{% if priority_filter %}&priority={{ priority_filter }}{% endif %}"
+     class="filter-btn {% if filter_status == 'completed' %}active{% endif %}">Completed</a>
+  <div class="filter-sep"></div>
+  <a href="?filter={{ filter_status }}&priority=high"
+     class="filter-btn {% if priority_filter == 'high' %}active{% endif %}">🔴 High</a>
+  <a href="?filter={{ filter_status }}&priority=medium"
+     class="filter-btn {% if priority_filter == 'medium' %}active{% endif %}">🟡 Medium</a>
+  <a href="?filter={{ filter_status }}&priority=low"
+     class="filter-btn {% if priority_filter == 'low' %}active{% endif %}">🟢 Low</a>
+  {% if priority_filter %}
+    <a href="?filter={{ filter_status }}" class="filter-btn">✕ Clear</a>
+  {% endif %}
+</div>
+
+<!-- Search results info -->
+{% if search_query %}
+  <p style="color: #8888a8; font-size: 0.85rem; margin-bottom: 0.75rem;">
+    Showing results for "<strong style="color: #e8e8f0;">{{ search_query }}</strong>"
+    — {{ todos|length }} task{{ todos|length|pluralize }} found
+  </p>
+{% endif %}
+
+<!-- Todo list -->
+<div class="todo-list">
+  {% for todo in todos %}
+  <div class="todo-item {% if todo.completed %}done{% endif %}">
+    <!-- Toggle button -->
+    <form method="post" action="{% url 'toggle_todo' todo.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="todo-check" title="Mark {% if todo.completed %}incomplete{% else %}complete{% endif %}">
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
+
+    <div class="todo-body">
+      <div class="todo-title">{{ todo.title }}</div>
+      {% if todo.description %}
+        <div class="todo-desc">{{ todo.description }}</div>
+      {% endif %}
+      <div class="todo-meta">
+        <span class="badge badge-{{ todo.priority }}">{{ todo.priority }}</span>
+        <span class="todo-date">{{ todo.created_at|date:"M d" }}</span>
+      </div>
+    </div>
+
+    <div class="todo-actions">
+      <a href="{% url 'edit_todo' todo.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+      <form method="post" action="{% url 'delete_todo' todo.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm"
+          onclick="return confirm('Delete this task?')">✕</button>
+      </form>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty">
+    <div class="icon">✓</div>
+    {% if search_query %}
+      <p>No tasks found for "{{ search_query }}"</p>
+    {% else %}
+      <p>No tasks here. Add one above!</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+{% if completed > 0 %}
+<div class="footer-actions">
+  <form method="post" action="{% url 'clear_completed' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-ghost btn-sm"
+      onclick="return confirm('Remove all completed tasks?')">Clear completed</button>
+  </form>
+</div>
+{% endif %}
+
+{% endblock %}
