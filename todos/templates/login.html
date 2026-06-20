@@ -1,0 +1,42 @@
+{% extends 'todos/base.html' %}
+{% block content %}
+
+<header>
+  <span class="dot"></span>
+  <h1>Shak</h1>
+</header>
+
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="message">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="add-card">
+  <h2 style="color: var(--text); font-size: 1.1rem; margin-bottom: 1rem;">Sign in to your account</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem; display:block; margin-bottom:0.35rem;">Username</label>
+        <input type="text" name="username" class="form-input" placeholder="Enter username" autofocus/>
+      </div>
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem; display:block; margin-bottom:0.35rem;">Password</label>
+        <input type="password" name="password" class="form-input" placeholder="Enter password"/>
+      </div>
+      {% if form.errors %}
+        <div style="color: var(--red); font-size: 0.85rem;">Invalid username or password.</div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary">Login</button>
+    </div>
+  </form>
+  <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.85rem;">
+    Don't have an account?
+    <a href="{% url 'register' %}" style="color: var(--accent);">Register here</a>
+  </p>
+</div>
+
+{% endblock %}

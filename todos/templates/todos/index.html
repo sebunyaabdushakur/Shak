@@ -2,11 +2,19 @@
 {% block content %}
 
 <header>
-  <span class="dot"></span>
-  <h1>Shak</h1>
-  <div class="stats">
-    <span><strong>{{ active }}</strong> left</span>
-    <span><strong>{{ completed }}</strong> done</span>
+  <div class="header-brand">
+    <span class="dot"></span>
+    <h1>Shak</h1>
+  </div>
+  <div class="header-actions">
+    <div class="stats">
+      <span><strong>{{ active }}</strong> left</span>
+      <span><strong>{{ completed }}</strong> done</span>
+    </div>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+    </form>
   </div>
 </header>
 
